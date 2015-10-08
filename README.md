@@ -1,0 +1,2 @@
+# simplejs
+Simple javascript library
