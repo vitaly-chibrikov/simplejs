@@ -1,0 +1,34 @@
+<html>
+<head>
+	<title>vitaly-chibrikov/simplejs example</title>
+    <script src="local_events_broadcast.js"></script>
+    <script src="master_slave.js"></script>
+    <script>
+        function init(){
+            LocalEventsBroadcast.init();
+            MasterSlave.init();
+
+            document.getElementById("IsMaster").innerHTML = MasterSlave.isMaster();
+            document.getElementById("TabId").innerHTML = MasterSlave.tabId;
+
+            LocalEventsBroadcast.subscribe(MasterSlave.MASTER_CHANGED_EVENT_NAME, function(event){
+                document.getElementById("IsMaster").innerHTML = event;
+            });
+
+            LocalEventsBroadcast.subscribe("test", function(event){
+                console.log(JSON.stringify(event));
+            });
+
+            LocalEventsBroadcast.dispatch("test", "Hello from the same tab");
+
+            LocalEventsBroadcast.dispatchGlobal("test", "Hello from the different tab");
+        }
+    </script>
+</head>
+<body onload="init();">
+<p id="IsMaster"></p>
+<p id="TabId"></p>
+
+</body>
+</html>
+
