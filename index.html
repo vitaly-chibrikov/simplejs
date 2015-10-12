@@ -1,0 +1,27 @@
+<html>
+<head>
+    <script src="simple-local-events-broadcast.js"></script>
+    <script src="simple-master-slave.js"></script>
+    <script>
+        function init(){
+            document.getElementById("IsMaster").innerHTML = MasterSlaveIsMaster();
+
+            LocalEventsBroadcast.subscribe(MASTER_CHANGED_EVENT_NAME, function(event){
+                document.getElementById("IsMaster").innerHTML = event;
+            });
+
+            LocalEventsBroadcast.subscribe("test", function(event){
+                console.log(JSON.stringify(event));
+            });
+
+            LocalEventsBroadcast.dispatch("test", "Hello from the same tab");
+
+            LocalEventsBroadcast.dispatchGlobal("test", "Hello from the different tab");
+        }
+    </script>
+</head>
+<body onload="init();">
+<p id="IsMaster"></p>
+
+</body>
+</html>
