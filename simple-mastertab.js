@@ -44,7 +44,7 @@
         start: function () {
             MasterTab.dropMasterIfObsolete();
             MasterTab.tabId = MasterTab.getTabId();
-            window.onunload = MasterTab.onUnload;
+            window.addEventListener("unload", MasterTab.onUnload);
             LocalEventsBroadcast.subscribe(MasterTab.MASTER_LEFT_EVENT_NAME, function (event) {
                 MasterTab.tryMaster();
             });
@@ -55,14 +55,17 @@
 
         //public
         isMaster: function () {
-            var masterTabId = localStorage.getItem(MasterTab.MASTER_ID_NAME);
-            var id = MasterTab.getIdFromLocalStorage();
-            return id === MasterTab.tabId;
+            var masterTabId = MasterTab.getMasterTabId();
+            if (masterTabId != null) {
+                var id = JSON.parse(masterTabId).tabId;
+                return id === MasterTab.tabId;
+            }
+            return false;
         },
 
         //public
         tryMaster: function () {
-            var masterTabId = localStorage.getItem(MasterTab.MASTER_ID_NAME);
+            var masterTabId = MasterTab.getMasterTabId();
             if (!masterTabId) {
                 var currentTime = new Date().getTime();
                 var toStore = JSON.stringify({'tabId': MasterTab.tabId, 'time': currentTime});
@@ -70,8 +73,7 @@
 
                 clearTimeout(MasterTab.isMasterHandle);
                 MasterTab.isMasterHandle = setTimeout(function () {
-                    var id = MasterTab.getIdFromLocalStorage();
-                    var isMaster = (id === MasterTab.tabId);
+                    var isMaster = MasterTab.isMaster();
                     LocalEventsBroadcast.dispatch(MasterTab.MASTER_CHANGED_EVENT_NAME, isMaster);
                 }, MasterTab.TRY_MASTER_DELAY);
 
@@ -104,14 +106,13 @@
         },
 
         //private
-        getIdFromLocalStorage: function () {
-            var masterTabId = localStorage.getItem(MasterTab.MASTER_ID_NAME);
-            return JSON.parse(masterTabId).tabId;
+        getMasterTabId: function () {
+            return localStorage.getItem(MasterTab.MASTER_ID_NAME);
         },
 
         //private
         dropMasterIfObsolete: function () {
-            var masterTabId = localStorage.getItem(MasterTab.MASTER_ID_NAME);
+            var masterTabId = MasterTab.getMasterTabId();
             if (masterTabId) {
                 var currentTime = new Date().getTime();
                 var masterTime = JSON.parse(masterTabId).time;
